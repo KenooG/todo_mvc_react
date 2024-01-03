@@ -9,6 +9,7 @@ function Tasks({handleDeleteTask, handleChangeStatus, filter, tasks, handleConte
                 .filter((task) => filter === 'all' ? true : task.status === filter)
                 .map((task) => (
                     <Task
+                        
                         handleChangeStatus={handleChangeStatus}
                         handleDeleteTask={handleDeleteTask}
                         task={task}

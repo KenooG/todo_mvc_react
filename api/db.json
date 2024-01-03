@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "name": "do some awesome",
+      "status": false,
+      "id": 1
+    },
+    {
+      "name": "Learn React",
+      "status": true,
+      "id": 2
+    }
+  ]
+}
