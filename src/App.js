@@ -5,22 +5,7 @@ import Tasks from "./components/Tasks/Tasks";
 import {TaskCounter} from "./components/TaskCounter/TaskCounter";
 import {Filters} from "./components/Filters/Filters";
 import {ClearCompleted} from "./components/ClearCompleted/ClearCompleted";
-import {getAllTasks} from "./helpers/api.js";
-
-
-function* genId() {
-    let id = 0;
-
-    while (true) {
-
-        yield id
-        id++
-    }
-
-}
-
-const nextId = genId()
-
+import {addTaskApi, getAllTasksApi} from "./helpers/api.js";
 
 
 
@@ -33,23 +18,32 @@ function App() {
 
 
     useEffect( () => {
-      getAllTasks().then(setTasks);
 
+        const controller = new AbortController()
+      getAllTasksApi(controller.signal).then(setTasks);
+
+      return () => {
+          controller.abort()
+
+      }
 
     }, []);
 
 
 
+async function deleteTaskApi(taskId){
+
+    const response = await fetch(`http://localhost:3001/tasks/${taskId}`,{method: 'DELETE'})
+
+    return await response.json()
 
 
+}
 
-    function handleAddTask( value) {
 
-            setTasks([...tasks, {
-                id: nextId.next().value,
-                name: value,
-                status: false
-            }])
+   async function handleAddTask( value) {
+           const task = await addTaskApi({name: value, status: false})
+            setTasks([...tasks, task])
     }
 
     function handleChangeStatus(task) {
@@ -58,14 +52,32 @@ function App() {
 
     }
 
-    function handleDeleteTask(taskToRemove) {
+   async function handleDeleteTask(taskToRemove) {
+
+         await deleteTaskApi(taskToRemove.id)
         setTasks(tasks.filter((task) => task !== taskToRemove))
+
+
 
     }
 
 
-    function handleDeleteAllTasks() {
-        setTasks(tasks.filter((task) => !task.status))
+   async function handleDeleteAllTasks() {
+
+    const filteredTasks = []
+
+        for(const task of tasks){
+            if(task.status){
+                await deleteTaskApi(task.id)
+            }else{
+
+                filteredTasks.push(task)
+            }
+
+
+        }
+
+        setTasks(filteredTasks)
 
     }
 
